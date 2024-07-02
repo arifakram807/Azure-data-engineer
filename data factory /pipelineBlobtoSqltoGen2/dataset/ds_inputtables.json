@@ -1,0 +1,13 @@
+{
+	"name": "ds_inputtables",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sqldest",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
