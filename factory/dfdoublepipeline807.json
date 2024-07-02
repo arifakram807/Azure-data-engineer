@@ -1,9 +1,0 @@
-{
-	"name": "dfdoublepipeline807",
-	"location": "centralindia",
-	"identity": {
-		"type": "SystemAssigned",
-		"principalId": "3e0a7fbb-7fed-4716-b767-47dc9c6dc6ce",
-		"tenantId": "70de1992-07c6-480f-a318-a1afcba03983"
-	}
-}
