@@ -1,0 +1,38 @@
+{
+	"name": "plSSIS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute SSIS package",
+				"type": "ExecuteSSISPackage",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"packageLocation": {
+						"type": "InlinePackage",
+						"typeProperties": {
+							"packageName": "Package.dtsx",
+							"packageContent": "VER001_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",
+							"packageLastModifiedDate": "2024-07-02T15:12:16.386Z UTC-5:00"
+						}
+					},
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "Inssis807",
+						"type": "IntegrationRuntimeReference"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-07-02T20:12:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

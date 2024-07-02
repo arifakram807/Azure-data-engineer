@@ -1,0 +1,28 @@
+{
+	"name": "Inssis807",
+	"properties": {
+		"type": "Managed",
+		"description": "creating ssis runtime on prem ssis package",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "East US",
+				"nodeSize": "Standard_D4_v3",
+				"numberOfNodes": 2,
+				"maxParallelExecutionsPerNode": 4
+			},
+			"ssisProperties": {
+				"catalogInfo": {
+					"catalogServerEndpoint": "mysqlserver807.database.windows.net",
+					"catalogAdminUserName": "arifakram",
+					"catalogAdminPassword": {
+						"type": "SecureString",
+						"value": "**********"
+					},
+					"catalogPricingTier": "S1"
+				},
+				"edition": "Standard",
+				"licenseType": "LicenseIncluded"
+			}
+		}
+	}
+}
