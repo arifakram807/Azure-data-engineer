@@ -1,0 +1,9 @@
+{
+	"name": "dfdataflowpractice1",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "51fb5cac-18d8-44ae-9da3-43ccd30d1506",
+		"tenantId": "70de1992-07c6-480f-a318-a1afcba03983"
+	}
+}
