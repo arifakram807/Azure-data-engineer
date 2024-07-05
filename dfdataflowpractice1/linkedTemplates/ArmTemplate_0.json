@@ -1,0 +1,340 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfdataflowpractice1"
+		},
+		"ls_blobsrc_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_blobsrc'"
+		},
+		"ls_destGen2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_destGen2'"
+		},
+		"ls_destGen2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://datest123.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_blobsrc')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_blobsrc_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_destGen2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_destGen2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_destGen2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_blobSrc')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blobsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Online Sales Data.csv",
+						"container": "test"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Transaction ID",
+						"type": "String"
+					},
+					{
+						"name": "Date",
+						"type": "String"
+					},
+					{
+						"name": "Product Category",
+						"type": "String"
+					},
+					{
+						"name": "Product Name",
+						"type": "String"
+					},
+					{
+						"name": "Units Sold",
+						"type": "String"
+					},
+					{
+						"name": "Unit Price",
+						"type": "String"
+					},
+					{
+						"name": "Total Revenue",
+						"type": "String"
+					},
+					{
+						"name": "Region",
+						"type": "String"
+					},
+					{
+						"name": "Payment Method",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blobsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_destGen2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_destGen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "con1"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "<!DOCTYPE html>",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_destGen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_blobSrc",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_destGen2",
+								"type": "DatasetReference"
+							},
+							"name": "sinkAmerica"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_destGen2",
+								"type": "DatasetReference"
+							},
+							"name": "sinkAsia"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_destGen2",
+								"type": "DatasetReference"
+							},
+							"name": "sinkEurope"
+						}
+					],
+					"transformations": [
+						{
+							"name": "select"
+						},
+						{
+							"name": "aggregatesales"
+						},
+						{
+							"name": "sortedSales"
+						},
+						{
+							"name": "splitedSales"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {Transaction ID} as short,",
+						"          Date as date,",
+						"          {Product Category} as string,",
+						"          {Product Name} as string,",
+						"          {Units Sold} as short,",
+						"          {Unit Price} as short,",
+						"          {Total Revenue} as short,",
+						"          Region as string,",
+						"          {Payment Method} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source1 select(mapColumn(",
+						"          Date,",
+						"          {Product Category},",
+						"          {Product Name},",
+						"          {Units Sold},",
+						"          {Unit Price},",
+						"          {Total Revenue},",
+						"          Region,",
+						"          {Payment Method}",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select",
+						"select aggregate(groupBy({Product Category},",
+						"          Region,",
+						"          {Payment Method}),",
+						"     TotalRevenue = sum({Total Revenue}),",
+						"          MaxRevenue = max({Total Revenue}),",
+						"          MinRevenue = min({Total Revenue}),",
+						"          CountUnits = count({Units Sold})) ~> aggregatesales",
+						"aggregatesales sort(desc(TotalRevenue, true)) ~> sortedSales",
+						"sortedSales split(Region == 'North America',",
+						"     Region == 'Asia',",
+						"     Region == 'Europe',",
+						"     disjoint: false) ~> splitedSales@(NorthAmericasales, AsiaSales, EuropeSales)",
+						"splitedSales@NorthAmericasales sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          {<!DOCTYPE html>} as string",
+						"     ),",
+						"     partitionFileNames:['NorthAmerica.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sinkAmerica",
+						"splitedSales@AsiaSales sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          {<!DOCTYPE html>} as string",
+						"     ),",
+						"     partitionFileNames:['Asia.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sinkAsia",
+						"splitedSales@EuropeSales sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          {<!DOCTYPE html>} as string",
+						"     ),",
+						"     partitionFileNames:['Europe.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sinkEurope"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_blobSrc')]",
+				"[concat(variables('factoryId'), '/datasets/ds_destGen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Pl_dataflowpr1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sinkAmerica": {},
+									"sinkAsia": {},
+									"sinkEurope": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-07-05T01:17:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow')]"
+			]
+		}
+	]
+}
