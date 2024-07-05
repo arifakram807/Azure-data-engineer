@@ -1,0 +1,130 @@
+{
+	"name": "dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_blobSrc",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_destGen2",
+						"type": "DatasetReference"
+					},
+					"name": "sinkAmerica"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_destGen2",
+						"type": "DatasetReference"
+					},
+					"name": "sinkAsia"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_destGen2",
+						"type": "DatasetReference"
+					},
+					"name": "sinkEurope"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select"
+				},
+				{
+					"name": "aggregatesales"
+				},
+				{
+					"name": "sortedSales"
+				},
+				{
+					"name": "splitedSales"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Transaction ID} as short,",
+				"          Date as date,",
+				"          {Product Category} as string,",
+				"          {Product Name} as string,",
+				"          {Units Sold} as short,",
+				"          {Unit Price} as short,",
+				"          {Total Revenue} as short,",
+				"          Region as string,",
+				"          {Payment Method} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 select(mapColumn(",
+				"          Date,",
+				"          {Product Category},",
+				"          {Product Name},",
+				"          {Units Sold},",
+				"          {Unit Price},",
+				"          {Total Revenue},",
+				"          Region,",
+				"          {Payment Method}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select",
+				"select aggregate(groupBy({Product Category},",
+				"          Region,",
+				"          {Payment Method}),",
+				"     TotalRevenue = sum({Total Revenue}),",
+				"          MaxRevenue = max({Total Revenue}),",
+				"          MinRevenue = min({Total Revenue}),",
+				"          CountUnits = count({Units Sold})) ~> aggregatesales",
+				"aggregatesales sort(desc(TotalRevenue, true)) ~> sortedSales",
+				"sortedSales split(Region == 'North America',",
+				"     Region == 'Asia',",
+				"     Region == 'Europe',",
+				"     disjoint: false) ~> splitedSales@(NorthAmericasales, AsiaSales, EuropeSales)",
+				"splitedSales@NorthAmericasales sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {<!DOCTYPE html>} as string",
+				"     ),",
+				"     partitionFileNames:['NorthAmerica.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkAmerica",
+				"splitedSales@AsiaSales sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {<!DOCTYPE html>} as string",
+				"     ),",
+				"     partitionFileNames:['Asia.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkAsia",
+				"splitedSales@EuropeSales sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {<!DOCTYPE html>} as string",
+				"     ),",
+				"     partitionFileNames:['Europe.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkEurope"
+			]
+		}
+	}
+}
