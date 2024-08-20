@@ -1,0 +1,18 @@
+Azure blob container
+https://trainingcon.blob.core.windows.net/blobcon
+
+Sas Token:
+sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2024-08-20T07:15:33Z&st=2024-08-19T23:15:33Z&spr=https,http&sig=GG68cWSUAZWr8UC1xC4KNIDHJCopmEWBPwYtDzZQpM8%3D
+
+Combined key
+
+https://trainingcon.blob.core.windows.net/blobcon/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2024-08-20T07:15:33Z&st=2024-08-19T23:15:33Z&spr=https,http&sig=GG68cWSUAZWr8UC1xC4KNIDHJCopmEWBPwYtDzZQpM8%3D
+
+Data lake gen 2 key
+https://testaz807.blob.core.windows.net/destcon
+SAS token
+sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2024-08-20T08:08:39Z&st=2024-08-20T00:08:39Z&spr=https,http&sig=LnmLc4MiP3WwT2IERnd%2BUVJjeh7f2C4YqZAe3wM9oAY%3D
+
+Combined
+
+https://testaz807.blob.core.windows.net/destcon/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2024-08-20T08:08:39Z&st=2024-08-20T00:08:39Z&spr=https,http&sig=LnmLc4MiP3WwT2IERnd%2BUVJjeh7f2C4YqZAe3wM9oAY%3D
